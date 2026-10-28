@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gram Panchayat Complaint Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* ---------- 1. STYLING (CSS) ---------- */
+:root{
+  --bg:#f3f6f4; --card:#ffffff; --ink:#1b2a24; --muted:#5d6f66;
+  --green:#1f5d3a; --line:#d5ded9;
+  --pending:#b45309; --progress:#1d4ed8; --resolved:#15803d; --rejected:#b91c1c;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Mukta',Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+header{background:var(--green);color:#fff;padding:22px 16px}
+header .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+header h1{margin:0;font-size:1.6rem;font-weight:800}
+header p{margin:0;opacity:.85;font-size:.95rem}
+.wrap{max-width:960px;margin:0 auto}
+nav{display:flex;gap:6px;background:#fff;border-bottom:1px solid var(--line);padding:0 16px;overflow-x:auto}
+nav button{border:0;background:none;padding:14px 16px;font:600 1rem 'Mukta',Arial;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+nav button.active{color:var(--green);border-bottom-color:var(--green)}
+nav button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
+main{padding:22px 16px 60px}
+section{display:none}
+section.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:20px;margin-bottom:18px}
+h2{margin:0 0 14px;font-size:1.3rem}
+label{display:block;font-weight:600;margin:12px 0 4px}
+input,select,textarea{width:100%;padding:10px;border:1px solid #b9c6bf;border-radius:4px;font:inherit;background:#fff}
+textarea{min-height:100px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.row{grid-template-columns:1fr}}
+.btn{background:var(--green);color:#fff;border:0;border-radius:4px;padding:11px 22px;font:600 1rem 'Mukta',Arial;cursor:pointer;margin-top:16px}
+.btn.small{padding:6px 12px;margin:0;font-size:.9rem}
+.btn.grey{background:#6b7c73}
+.btn.red{background:var(--rejected)}
+.msg{margin-top:14px;padding:12px;border-radius:4px;background:#e6f4ea;border:1px solid #b7dfc2}
+.msg.err{background:#fde8e8;border-color:#f3b4b4}
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;color:#fff;font-size:.82rem;font-weight:600}
+.Pending{background:var(--pending)}.In\ Progress{background:var(--progress)}
+.Resolved{background:var(--resolved)}.Rejected{background:var(--rejected)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:#fff;border:1px solid var(--line);border-left:6px solid var(--green);border-radius:6px;padding:12px}
+.stat b{font-size:1.7rem;display:block}
+.complaint{border-top:1px solid var(--line);padding:14px 0}
+.complaint:first-child{border-top:0}
+.complaint h3{margin:0 0 4px;font-size:1.05rem}
+.meta{color:var(--muted);font-size:.88rem}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.actions select,.actions input{width:auto;padding:6px}
+.remark{background:#f3f6f4;border-left:4px solid var(--green);padding:8px 10px;margin-top:8px;font-size:.92rem}
+.empty{color:var(--muted);padding:16px 0}
+</style>
+</head>
+<body>
+
+<!-- ---------- 2. PAGE STRUCTURE (HTML) ---------- -->
+<header><div class="wrap">
+  <div><h1>Gram Panchayat Complaint Portal</h1>
+  <p>Report a local problem. Track it until it is solved.</p></div>
+  <p id="langNote">Village services, one place</p>
+</div></header>
+
+<nav><div class="wrap" style="display:flex;gap:6px">
+  <button class="active" data-tab="submit">Register complaint</button>
+  <button data-tab="track">Track complaint</button>
+  <button data-tab="admin">Panchayat office login</button>
+</div></nav>
+
+<main><div class="wrap">
+
+  <!-- Citizen: register complaint -->
+  <section id="submit" class="active">
+    <div class="card">
+      <h2>Register a complaint</h2>
+      <div class="row">
+        <div><label for="cName">Your name</label><input id="cName" autocomplete="name"></div>
+        <div><label for="cPhone">Mobile number (10 digits)</label><input id="cPhone" inputmode="numeric" maxlength="10"></div>
+      </div>
+      <div class="row">
+        <div><label for="cVillage">Village / Ward</label><input id="cVillage"></div>
+        <div><label for="cCat">Type of problem</label>
+          <select id="cCat">
+            <option>Drinking water</option><option>Street light</option><option>Road / drainage</option>
+            <option>Garbage / sanitation</option><option>Ration / pension</option><option>Other</option>
+          </select></div>
+      </div>
+      <label for="cDesc">Describe the problem</label>
+      <textarea id="cDesc" placeholder="Where is it, since when, how many people are affected?"></textarea>
+      <button class="btn" id="submitBtn">Submit complaint</button>
+      <div id="submitMsg"></div>
+    </div>
+  </section>
+
+  <!-- Citizen: track complaint -->
+  <section id="track">
+    <div class="card">
+      <h2>Track your complaint</h2>
+      <label for="tId">Complaint ID (example: GP-1001)</label>
+      <input id="tId" placeholder="GP-1001">
+      <button class="btn" id="trackBtn">Check status</button>
+      <div id="trackResult"></div>
+    </div>
+  </section>
+
+  <!-- Admin area -->
+  <section id="admin">
+    <div class="card" id="loginBox">
+      <h2>Panchayat office login</h2>
+      <label for="aPass">Password</label>
+      <input id="aPass" type="password" placeholder="Demo password: admin123">
+      <button class="btn" id="loginBtn">Log in</button>
+      <div id="loginMsg"></div>
+    </div>
+
+    <div id="adminPanel" style="display:none">
+      <div class="stats" id="stats"></div>
+      <div class="card">
+        <h2>All complaints</h2>
+        <div class="row">
+          <div><label for="fStatus">Show</label>
+            <select id="fStatus"><option>All</option><option>Pending</option><option>In Progress</option><option>Resolved</option><option>Rejected</option></select></div>
+          <div><label for="fSearch">Search (name, village, ID)</label><input id="fSearch"></div>
+        </div>
+        <div id="list"></div>
+        <div class="actions" style="margin-top:16px">
+          <button class="btn small grey" id="logoutBtn">Log out</button>
+          <button class="btn small red" id="resetBtn">Reset demo data</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div></main>
+
+<!-- ---------- 3. LOGIC (JavaScript) ---------- -->
+<script>
+/* DATA: complaints are stored in the browser's localStorage as a JSON list.
+   (A real deployment would use a server + database such as Flask + MySQL.) */
+const KEY = 'gpComplaints';
+const ADMIN_PASSWORD = 'admin123';   // demo only
+let isAdmin = false;
+
+function seedData(){
+  return [
+    {id:'GP-1001',name:'Ramesh K',phone:'9876543210',village:'Ward 2',cat:'Drinking water',
+     desc:'No water supply in our street for 4 days.',status:'In Progress',remark:'Pipeline repair team assigned.',date:'2026-10-20'},
+    {id:'GP-1002',name:'Lakshmi',phone:'9123456780',village:'Ward 5',cat:'Street light',
+     desc:'Three street lights near the school are not working.',status:'Pending',remark:'',date:'2026-10-24'},
+    {id:'GP-1003',name:'Manjunath',phone:'9988776655',village:'Ward 1',cat:'Garbage / sanitation',
+     desc:'Garbage not collected from the market road.',status:'Resolved',remark:'Cleared on 26 Oct.',date:'2026-10-18'}
+  ];
+}
+function load(){
+  try{
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if(Array.isArray(d)) return d;
+  }catch(e){}
+  const s = seedData(); save(s); return s;
+}
+function save(list){ try{ localStorage.setItem(KEY, JSON.stringify(list)); }catch(e){} }
+
+/* Escape text before showing it, so users cannot inject HTML */
+function esc(t){ const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+const $ = id => document.getElementById(id);
+
+function nextId(list){
+  const nums = list.map(c => parseInt(c.id.split('-')[1])||1000);
+  return 'GP-' + (Math.max(1000,...nums)+1);
+}
+
+/* TABS */
+document.querySelectorAll('nav button').forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('section').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); $(b.dataset.tab).classList.add('active');
+    if(b.dataset.tab==='admin' && isAdmin) renderAdmin();
+  };
+});
+
+/* SUBMIT COMPLAINT (with validation) */
+$('submitBtn').onclick = ()=>{
+  const name=$('cName').value.trim(), phone=$('cPhone').value.trim(),
+        village=$('cVillage').value.trim(), desc=$('cDesc').value.trim();
+  const box=$('submitMsg');
+  if(!name||!village||desc.length<10){
+    box.innerHTML='<div class="msg err">Please fill name, village and a description of at least 10 characters.</div>'; return;
+  }
+  if(!/^[6-9]\d{9}$/.test(phone)){
+    box.innerHTML='<div class="msg err">Enter a valid 10-digit mobile number starting with 6, 7, 8 or 9.</div>'; return;
+  }
+  const list=load();
+  const c={id:nextId(list),name,phone,village,cat:$('cCat').value,desc,
+           status:'Pending',remark:'',date:new Date().toISOString().slice(0,10)};
+  list.push(c); save(list);
+  box.innerHTML='<div class="msg">Complaint registered. Your Complaint ID is <b>'+esc(c.id)+'</b>. Note it down to track the status.</div>';
+  ['cName','cPhone','cVillage','cDesc'].forEach(i=>$(i).value='');
+};
+
+/* TRACK COMPLAINT */
+$('trackBtn').onclick = ()=>{
+  const id=$('tId').value.trim().toUpperCase();
+  const c=load().find(x=>x.id===id);
+  $('trackResult').innerHTML = c
+   ? '<div class="msg"><b>'+esc(c.id)+'</b> &nbsp;<span class="badge '+c.status+'">'+c.status+'</span>'
+     +'<div>'+esc(c.cat)+' | '+esc(c.village)+' | filed on '+esc(c.date)+'</div>'
+     +'<p>'+esc(c.desc)+'</p>'
+     +(c.remark?'<div class="remark">Office remark: '+esc(c.remark)+'</div>':'')+'</div>'
+   : '<div class="msg err">No complaint found with this ID. Check the ID and try again.</div>';
+};
+
+/* ADMIN LOGIN */
+$('loginBtn').onclick = ()=>{
+  if($('aPass').value===ADMIN_PASSWORD){
+    isAdmin=true; $('loginBox').style.display='none'; $('adminPanel').style.display='block'; renderAdmin();
+  }else{
+    $('loginMsg').innerHTML='<div class="msg err">Wrong password. Try again.</div>';
+  }
+};
+$('logoutBtn').onclick = ()=>{
+  isAdmin=false; $('adminPanel').style.display='none'; $('loginBox').style.display='block'; $('aPass').value='';
+};
+
+/* ADMIN DASHBOARD */
+function renderAdmin(){
+  const all=load();
+  const count=s=>all.filter(c=>c.status===s).length;
+  $('stats').innerHTML=
+    '<div class="stat"><b>'+all.length+'</b>Total</div>'+
+    '<div class="stat"><b>'+count('Pending')+'</b>Pending</div>'+
+    '<div class="stat"><b>'+count('In Progress')+'</b>In progress</div>'+
+    '<div class="stat"><b>'+count('Resolved')+'</b>Resolved</div>';
+
+  const f=$('fStatus').value, q=$('fSearch').value.toLowerCase();
+  const shown=all.filter(c=>(f==='All'||c.status===f) &&
+    (c.name+c.village+c.id).toLowerCase().includes(q)).reverse();
+
+  $('list').innerHTML = shown.length ? shown.map(c=>
+    '<div class="complaint"><h3>'+esc(c.id)+': '+esc(c.cat)+' <span class="badge '+c.status+'">'+c.status+'</span></h3>'
+    +'<div class="meta">'+esc(c.name)+' ('+esc(c.phone)+') | '+esc(c.village)+' | '+esc(c.date)+'</div>'
+    +'<p>'+esc(c.desc)+'</p>'
+    +(c.remark?'<div class="remark">Remark: '+esc(c.remark)+'</div>':'')
+    +'<div class="actions">'
+    +'<select id="st_'+c.id+'">'+['Pending','In Progress','Resolved','Rejected'].map(s=>'<option'+(s===c.status?' selected':'')+'>'+s+'</option>').join('')+'</select>'
+    +'<input id="rm_'+c.id+'" placeholder="Add remark" value="'+esc(c.remark).replace(/"/g,'&quot;')+'">'
+    +'<button class="btn small" onclick="updateComplaint(\''+c.id+'\')">Save update</button>'
+    +'<button class="btn small red" onclick="deleteComplaint(\''+c.id+'\')">Delete</button>'
+    +'</div></div>').join('')
+  : '<div class="empty">No complaints match this filter.</div>';
+}
+$('fStatus').onchange=renderAdmin;
+$('fSearch').oninput=renderAdmin;
+
+function updateComplaint(id){
+  const list=load(), c=list.find(x=>x.id===id);
+  c.status=$('st_'+id).value; c.remark=$('rm_'+id).value.trim();
+  save(list); renderAdmin();
+}
+function deleteComplaint(id){
+  if(!confirm('Delete complaint '+id+'? This cannot be undone.')) return;
+  save(load().filter(x=>x.id!==id)); renderAdmin();
+}
+$('resetBtn').onclick=()=>{
+  if(confirm('Replace all data with the 3 demo complaints?')){ save(seedData()); renderAdmin(); }
+};
+</script>
+</body>
+</html>
